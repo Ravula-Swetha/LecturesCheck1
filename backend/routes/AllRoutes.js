@@ -1,4 +1,5 @@
 const express = require("express");
+require('dotenv').config();
 const { User, Pdf, Video } = require("../Models/AllSchema");
 const fs = require("fs");
 const path = require("path");
@@ -8,6 +9,7 @@ const bcrypt = require("bcrypt");
 const ffmpeg = require("fluent-ffmpeg");
 const axios = require("axios");
 const FormData = require("form-data");
+
 
 const allroutes = express.Router();
 
@@ -58,6 +60,7 @@ const convertVideoToAudio = (inputVideo, outputAudio) => {
     });
 };
 
+const assemblyaiKey = process.env.ASSEMBLYAI_KEY;
 const uploadAudioToAssemblyAI = async (filePath) => {
     const formData = new FormData();
     formData.append("audio", fs.createReadStream(filePath));
@@ -65,7 +68,7 @@ const uploadAudioToAssemblyAI = async (filePath) => {
     try {
         const response = await axios.post("https://api.assemblyai.com/v2/upload", formData, {
             headers: {
-                "authorization": "443e85486085485189193ac8a9867902",
+                "authorization": assemblyaiKey,
                 ...formData.getHeaders(),
             },
         });
@@ -82,7 +85,7 @@ const transcribeAudioToText = async (audioUrl) => {
     try {
         const response = await axios.post("https://api.assemblyai.com/v2/transcript", config, {
             headers: {
-                "authorization": "443e85486085485189193ac8a9867902",
+                "authorization": assemblyaiKey,
             },
         });
         const transcriptId = response.data.id;
@@ -91,7 +94,7 @@ const transcribeAudioToText = async (audioUrl) => {
         while (true) {
             const transcriptResponse = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
                 headers: {
-                    "authorization": "443e85486085485189193ac8a9867902",
+                    "authorization": assemblyaiKey,
                 },
             });
             transcript = transcriptResponse.data;
