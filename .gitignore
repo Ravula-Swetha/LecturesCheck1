@@ -1,0 +1,4 @@
+node_modules/
+
+# Ignore TensorFlow library
+venv/
